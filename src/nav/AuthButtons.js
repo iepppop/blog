@@ -1,10 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled'
 import { useTheme } from '@emotion/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation  } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from "../firebase";
 import { logout } from '../features/userSlice';
+
+
 
 const AuthWrap = styled.div`
     position:fixed;
@@ -33,15 +37,13 @@ const ToggleButton = styled.button`
 `
 
 const ProfileWrap = styled.div`
-    width:35px;
-    height:35px;
     position:relative;
 `
 
 const Profile = styled.div`
-    width:100%;
+    width:35px;
+    height:35px;
     cursor:pointer;
-    height:100%;
     overflow:hidden;
     border-radius:50%;
     border:1px solid ${props => props.theme.colors.border};
@@ -54,8 +56,10 @@ const ProfileInfo = styled.div`
     width:300px;
     border: 1px solid ${props => props.theme.colors.border};
     border-radius:10px;
+    background:${props => props.theme.colors.background};
+    height:0;
     opacity:0;
-    transition:.3s ease-in-out;
+    overflow:hidden;
 `
 
 const InfoImg = styled.div`
@@ -123,24 +127,52 @@ const Modify = styled.div`
 
 
 function AuthButtons({ toggleTheme }) {
-    const user = useSelector((state) => state.data.user.user);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const profileRef = useRef();
+    const tl = useRef();
     const [isOpen, setIsOpen] = useState(false);
     const [height, setHeight] = useState(0);
-    const profileHeight = useRef();
-    const dispatch = useDispatch();
+    const user = useSelector((state) => state.data.user.user);
+
     const handleLogout = () => {
         dispatch(logout());
     };
 
-    const openProfile = () => {
-        setHeight(profileHeight?.current.offsetHeight);
-        console.log(height)
+    function openProfile(){
         setIsOpen(!isOpen);
-        profileHeight.current.style.height = isOpen ? `${height}px` : 0;
-        profileHeight.current.style.opacity = isOpen ? 1 : 0;
+        tl.current.reversed(!tl.current.reversed());
+    };
+
+    const moveEditPage = () =>{
+        navigate('/profile/edit');
+        setIsOpen(false);
     }
 
+    // useGSAP(
+    // () => {
+    //         tl.current = gsap
+    //         .timeline()
+    //         .to(profileRef.current, { opacity: 1, ease: "none"},0)
+    //         .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
+    //         .reverse();
+    //     },
+    //     { scope: user }
+    // );  
 
+    useEffect(() => {
+        tl.current = gsap
+        .timeline()
+        .to(profileRef.current, { opacity: 1, ease: "none"},0)
+        .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
+        .reverse();
+      }, [user]);
+
+      useEffect(() => {
+        tl.current.reversed(!tl.current.reversed());
+      }, [location]);
+    
     return (
         <AuthWrap>
             {user ?
@@ -148,7 +180,8 @@ function AuthButtons({ toggleTheme }) {
                     <Profile onClick={openProfile}>
                         <img src={user.photoUrl} />
                     </Profile>
-                    <ProfileInfo ref={profileHeight}>
+                    <ProfileInfo ref={profileRef}>
+                        <div className="box">
                         <InfoImg>
                             <img src={user.photoUrl} />
                         </InfoImg>
@@ -157,9 +190,10 @@ function AuthButtons({ toggleTheme }) {
                             <span>{user.email}</span>
                         </InfoText>
                         <Modify>
-                            <button><Link to="/profile/edit">프로필 수정</Link></button>
+                            <button onClick={moveEditPage}>프로필 수정</button>
                             <button onClick={handleLogout}>로그아웃</button>
                         </Modify>
+                        </div>
                     </ProfileInfo>
                 </ProfileWrap>
                 :

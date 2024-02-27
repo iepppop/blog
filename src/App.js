@@ -11,6 +11,10 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase.js';
 import SignUpPage from './pages/SignUpPage.js';
 import ProfileEditPage from './pages/ProfileEditPage.js';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(useGSAP);
 
 const lightTheme = {
   colors: {
