@@ -47,9 +47,15 @@ const GlobalStyle = () => {
       text-decoration: none;
     }
 
+    img{
+      width:100%;
+      object-fit:cover;
+    }
+
     #root{
       height:100%;
     }
+    
   `;
 
   return <Global styles={style} />;
