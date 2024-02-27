@@ -14,8 +14,8 @@ export const login = (email, password) => {
         setPersistence(auth, browserLocalPersistence).then(() => {
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    const { uid, email } = userCredential.user;
-                    dispatch(loginUser({ uid, email }));
+                    const { uid, email, username, displayName } = userCredential.user;
+                    dispatch(loginUser({ uid, email, username, displayName }));
                 })
                 .catch((error) => {
                     const errorCode = error.code;
@@ -27,12 +27,12 @@ export const login = (email, password) => {
 
 export const logout = () => {
     return async (dispatch) => {
-      try {
-        await signOut(auth); 
-        dispatch(logoutUser()); 
-      } catch (error) {
-        console.error('로그아웃 에러:', error);
-      }
+        try {
+            await signOut(auth);
+            dispatch(logoutUser());
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+        }
     };
 };
 
@@ -40,16 +40,23 @@ export const signUp = (email, password, username) => {
     return async (dispatch) => {
         const displayName = username;
         createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            updateProfile(auth.currentUser, {
-                displayName: username, photoURL: "https://example.com/jane-q-user/profile.jpg"
-              })
-              console.log(userCredential.user)
-            const { uid, email, displayName, photoURL } = userCredential.user;
-            dispatch(loginUser({ uid, email, displayName, photoURL})); 
+            .then((userCredential) => {
+                updateProfile(auth.currentUser, {
+                    displayName: username, photoURL: "https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png"
+                })
+                const { uid, email, displayName, photoURL } = userCredential.user;
+                dispatch(loginUser({ uid, email, displayName, photoURL }));
+            })
+            .catch((error) => {
+            });
+    };
+};
+
+export const modifyProfile = (username) => {
+    return async (dispatch) => {
+        updateProfile(auth.currentUser, {
+            displayName: username
         })
-        .catch((error) => {
-        });
     };
 };
 
@@ -71,7 +78,7 @@ export const signUp = (email, password, username) => {
 //         } catch (error) {
 //             console.error('파일 업로드 에러:', error);
 //             dispatch(setLoading(false));
-         
+
 //         }
 //     };
 // };
