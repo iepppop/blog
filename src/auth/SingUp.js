@@ -109,7 +109,6 @@ function SignUp() {
                 onChange={(e) => setUsername(e.target.value)}
                 name="username"
                 type="text"
-            // autoComplete="email"
             />
             <InputName>비밀번호</InputName>
             <Input
