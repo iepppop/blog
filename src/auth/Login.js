@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled'
 import google from '../images/google.png'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from '../firebase'
+import { login } from '../features/userSlice.js';
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const FormWrap = styled.form`
     display:flex;
@@ -75,11 +79,16 @@ const RegisterBtn = styled.div`
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const auth = getAuth();
+    const dispatch = useDispatch();
+
+    const handleLogin = (email, password) => {
+        dispatch(login(email, password));
+    };
 
     return (
-        <FormWrap onSubmit={async e => {
+        <FormWrap onSubmit={ e => {
             e.preventDefault();
+            handleLogin(email,password);
           }}>
             <InputName>아이디</InputName>
             <Input
@@ -87,7 +96,7 @@ function Login() {
             onChange={(e) => setEmail(e.target.value)}
             name="email"
             type="email"
-            autoComplete="email"
+            // autoComplete="email"
           />
           <InputName>비밀번호</InputName>
           <Input
@@ -102,7 +111,9 @@ function Login() {
           >로그인
           </LoginBtn>
           <RegisterBtn>
+            <Link to={'/signup'}>
           회원가입
+          </Link>
           </RegisterBtn>
           <SnsBtn
             type="submit"
