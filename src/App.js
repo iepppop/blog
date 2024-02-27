@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase.js';
 import SignUpPage from './pages/SignUpPage.js';
+import ProfileEditPage from './pages/ProfileEditPage.js';
 
 const lightTheme = {
   colors: {
@@ -61,6 +62,7 @@ function App() {
       <Routes>
         <Route path='/login' element={<LoginPage />} ></Route>
         <Route path='/signup' element={<SignUpPage />} ></Route>
+        <Route path='/profile/edit' element={<ProfileEditPage />} ></Route>
       </Routes>
     </ThemeProvider>
   );
