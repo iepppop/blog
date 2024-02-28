@@ -118,6 +118,7 @@ const Modify = styled.div`
         text-align:center;
         font-size:12px;
         transition:0.2s ease-in;
+        color:${props => props.theme.colors.text};
 
         :hover{
             opacity:0.6;
@@ -135,6 +136,7 @@ function AuthButtons({ toggleTheme }) {
     const [isOpen, setIsOpen] = useState(false);
     const [height, setHeight] = useState(0);
     const user = useSelector((state) => state.data.user.user);
+    const isLoading = useSelector((state) => state.data.user.isLoading);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -167,26 +169,30 @@ function AuthButtons({ toggleTheme }) {
         .to(profileRef.current, { opacity: 1, ease: "none"},0)
         .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
         .reverse();
+        console.log('유저양',user)
+
       }, [user]);
 
-      useEffect(() => {
-        tl.current.reversed(!tl.current.reversed());
-      }, [location]);
+    useEffect(() => {
+        profileRef.current && tl.current.reversed(!tl.current.reversed());
+    }, [location]);
     
+
     return (
-        <AuthWrap>
+        <div>
+            {!isLoading ? <AuthWrap>
             {user ?
                 <ProfileWrap>
                     <Profile onClick={openProfile}>
-                        <img src={user.photoUrl} />
+                        <img src={user.photoURL} />
                     </Profile>
                     <ProfileInfo ref={profileRef}>
                         <div className="box">
                         <InfoImg>
-                            <img src={user.photoUrl} />
+                            <img src={user.photoURL} />
                         </InfoImg>
                         <InfoText>
-                            <span>{user.username}</span>
+                            <span>{user.displayName}</span>
                             <span>{user.email}</span>
                         </InfoText>
                         <Modify>
@@ -201,7 +207,8 @@ function AuthButtons({ toggleTheme }) {
             }
             <ToggleButton onClick={toggleTheme}>ddd</ToggleButton>
             {/* <LoginButton onClick={handleLogout}>로그아웃</LoginButton> */}
-        </AuthWrap>
+        </AuthWrap> :null}
+        </div>
     )
 }
 
