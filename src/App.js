@@ -5,7 +5,7 @@ import AuthButtons from './nav/AuthButtons.js'
 import GlobalStyle from './styles/global.js';
 import LoginPage from './pages/LoginPage.js';
 import { useState, useEffect } from 'react';
-import { initializeAuth, loginUser } from './features/userSlice.js';
+import { initializeAuth, loginUser, setLoading } from './features/userSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase.js';
@@ -47,16 +47,17 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (authUser) => {
-      if (authUser) {
-        dispatch(loginUser({
-          uid: authUser.uid,
-          username: authUser.displayName,
-          email: authUser.email,
-          photoUrl: authUser.photoURL,
-        }))
-      }
-    })
+        onAuthStateChanged(auth, (authUser) => {
+          if(authUser){
+            dispatch(loginUser({
+              uid: authUser.uid,
+              email: authUser.email,
+              displayName: authUser.displayName,
+              photoURL: authUser.photoURL,
+            }))
+            dispatch(setLoading(false))
+          }
+      })
   },[])
 
   return (
