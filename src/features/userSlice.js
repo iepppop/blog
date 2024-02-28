@@ -1,29 +1,29 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { signOut, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase.js'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, storage } from '../firebase.js'
 import { useDispatch } from 'react-redux';
 
 const initialState = {
     user: null,
     isLoading: true,
-    photoURL: 'https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png'
 }
 
 export const login = (email, password) => {
     return async (dispatch) => {
-        setPersistence(auth, browserLocalPersistence).then(() => {
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const { uid, email, username, displayName } = userCredential.user;
-                    dispatch(loginUser({ uid, email, username, displayName }));
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                });
-        })
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                const { uid, email, displayName, photoURL } = userCredential.user;
+                dispatch(loginUser({ uid, email, displayName, photoURL }));
+                dispatch(setLoading(false));
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+            });
     }
 };
+
 
 export const logout = () => {
     return async (dispatch) => {
@@ -42,23 +42,54 @@ export const signUp = (email, password, username) => {
         createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 updateProfile(auth.currentUser, {
-                    displayName: username, photoURL: "https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png"
+                    displayName, photoURL: "https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png"
+                }).then(() => {
+                    const { uid, email, displayName, photoURL } = userCredential.user;
+                    dispatch(loginUser({ uid, email, displayName, photoURL }));
                 })
-                const { uid, email, displayName, photoURL } = userCredential.user;
-                dispatch(loginUser({ uid, email, displayName, photoURL }));
             })
             .catch((error) => {
             });
     };
 };
 
-export const modifyProfile = (username) => {
+
+export const editProfile = (displayName, file) => {
     return async (dispatch) => {
-        updateProfile(auth.currentUser, {
-            displayName: username
-        })
-    };
-};
+        dispatch(setLoading(true));
+        let photoURL;
+        if(file.name.includes('storage')){
+            photoURL = file;
+        }else{
+            const fileRef = ref(storage, auth.currentUser.uid + '.png');
+            const snapshot = await uploadBytes(fileRef, file);
+            photoURL = await getDownloadURL(fileRef);
+        }
+        await updateProfile(auth.currentUser, {
+            displayName, photoURL
+        }).then(() => {
+            dispatch(setLoading(false));
+        })  
+    }
+}
+
+
+// const storage = getStorage();
+// const storageRef = ref(storage, 'some-child');
+
+
+// uploadBytes(storageRef, file).then((snapshot) => {
+//   console.log('Uploaded a blob or file!');
+// });
+
+
+// export const modifyProfile = (username) => {
+//     return async (dispatch) => {
+//         updateProfile(auth.currentUser, {
+//             displayName: username
+//         })
+//     };
+// };
 
 // export const uploadPhoto = (file, currentUser) => {
 //     return async (dispatch) => {
@@ -102,6 +133,6 @@ export const userSlice = createSlice({
     },
 });
 
-export const { loginUser, logoutUser, setLoading } = userSlice.actions;
+export const { loginUser, logoutUser, setLoading, setPhotoURL } = userSlice.actions;
 export default userSlice.reducer;
 
