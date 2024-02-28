@@ -87,7 +87,7 @@ function SignUp() {
     const dispatch = useDispatch();
 
     const handleSignUp = (email, password,username) => {
-        dispatch(signUp(email, password,username));
+        dispatch(signUp(email, password, username));
     };
 
     return (
