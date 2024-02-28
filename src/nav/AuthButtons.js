@@ -66,6 +66,7 @@ const InfoImg = styled.div`
     width:80px;
     height:80px;
     margin:50px auto 30px auto;
+    oveflow:hidden;
 
     img{
         border:3px solid ${props => props.theme.colors.border};
