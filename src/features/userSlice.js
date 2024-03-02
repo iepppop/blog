@@ -1,29 +1,57 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { signOut, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { auth, storage } from '../firebase.js'
-import { useDispatch } from 'react-redux';
+import { signOut, GoogleAuthProvider , GithubAuthProvider , signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
+import { auth } from '../firebase.js'
 
-const initialState = {
-    user: null,
-    isLoading: true,
-}
-
-export const login = (email, password) => {
-    return async (dispatch) => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const { uid, email, displayName, photoURL } = userCredential.user;
-                dispatch(loginUser({ uid, email, displayName, photoURL }));
-                dispatch(setLoading(false));
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-            });
+export const googleLogin = createAsyncThunk('user/googleLogin', async (_, thunkAPI) => {
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const { uid, email, displayName, photoURL } = result.user;
+        return { uid, email, displayName, photoURL };
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
     }
-};
+});
 
+export const githubLogin = createAsyncThunk('user/githubLogin', async (_, thunkAPI) => {
+    try {
+        const provider = new GithubAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const { uid, email, displayName, photoURL } = result.user;
+        console.log(result.user)
+        return { uid, email, displayName, photoURL };
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
+});
+
+export const checkUser = createAsyncThunk('user/checkUser', async (_, thunkAPI) => {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            thunkAPI.dispatch(loginUser({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            }))
+        }
+    });
+});
+
+export const login = createAsyncThunk('user/login', async ({ useremail, password }, thunkAPI) => {
+    thunkAPI.dispatch(setLoading(true))
+    try {
+        const { uid, email, displayName, photoURL } = await signInWithEmailAndPassword(auth, useremail, password);
+        return { uid, email, displayName, photoURL };
+    }
+    catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
+});
 
 export const logout = () => {
     return async (dispatch) => {
@@ -31,88 +59,39 @@ export const logout = () => {
             await signOut(auth);
             dispatch(logoutUser());
         } catch (error) {
-            console.error('로그아웃 에러:', error);
+            console.error(error);
         }
     };
 };
 
-export const signUp = (email, password, username) => {
-    return async (dispatch) => {
-        const displayName = username;
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                updateProfile(auth.currentUser, {
-                    displayName, photoURL: "https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png"
-                }).then(() => {
-                    const { uid, email, displayName, photoURL } = userCredential.user;
-                    dispatch(loginUser({ uid, email, displayName, photoURL }));
-                })
-            })
-            .catch((error) => {
-            });
-    };
-};
+export const signUp = createAsyncThunk('user/signUp', async ({ useremail, password, username }, thunkAPI) => {
+    thunkAPI.dispatch(setLoading(true));
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, useremail, password);
+        const user = userCredential.user;
 
+        await updateProfile(user, {
+            displayName: username,
+            photoURL: "https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png"
+        });
 
-export const editProfile = (displayName, file) => {
-    return async (dispatch) => {
-        dispatch(setLoading(true));
-        let photoURL;
-        if(file.name.includes('storage')){
-            photoURL = file;
-        }else{
-            const fileRef = ref(storage, auth.currentUser.uid + '.png');
-            const snapshot = await uploadBytes(fileRef, file);
-            photoURL = await getDownloadURL(fileRef);
-        }
-        await updateProfile(auth.currentUser, {
-            displayName, photoURL
-        }).then(() => {
-            dispatch(setLoading(false));
-        })  
+        return {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL
+        };
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
     }
+});
+
+
+const initialState = {
+    user: null,
+    isLoading: false,
+    error: '',
 }
-
-
-// const storage = getStorage();
-// const storageRef = ref(storage, 'some-child');
-
-
-// uploadBytes(storageRef, file).then((snapshot) => {
-//   console.log('Uploaded a blob or file!');
-// });
-
-
-// export const modifyProfile = (username) => {
-//     return async (dispatch) => {
-//         updateProfile(auth.currentUser, {
-//             displayName: username
-//         })
-//     };
-// };
-
-// export const uploadPhoto = (file, currentUser) => {
-//     return async (dispatch) => {
-//         const fileRef = ref(storage, currentUser.uid + 'png');
-
-//         dispatch(setLoading(true));
-
-//         try {
-//             const snapshot = await uploadBytes(fileRef, file);
-//             const photoURL = await getDownloadURL(fileRef);
-
-//             updateProfile(currentUser, { photoURL });
-
-//             dispatch(setPhotoURL(photoURL));
-//             dispatch(setLoading(false));
-//             alert('Uploaded file!');
-//         } catch (error) {
-//             console.error('파일 업로드 에러:', error);
-//             dispatch(setLoading(false));
-
-//         }
-//     };
-// };
 
 export const userSlice = createSlice({
     name: 'user',
@@ -125,14 +104,48 @@ export const userSlice = createSlice({
             state.user = null;
         },
         setLoading: (state, action) => {
-            state.isLoading = action.playload;
+            state.isLoading = action.payload;
         },
-        setPhotoURL: (state, action) => {
-            state.photoURL = action.payload;
-        }
     },
+    extraReducers: (builder) => {
+        builder
+            .addCase(checkUser.pending, (state, action) => {
+                state.isLoading = true;
+            })
+            .addCase(checkUser.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.isLoading = false;
+            })
+            .addCase(login.pending, (state, action) => {
+                state.user = action.payload;
+            })
+            .addCase(login.rejected, (state, action) => {
+                const errMsg = action.payload;
+                if (errMsg === 'Firebase: Error (auth/missing-email).') state.error = '가입되어 있지 않은 계정입니다.'
+                else if (errMsg === 'Firebase: Error (auth/invalid-email).') state.error = '이메일 형식이 아닙니다.'
+                else if (errMsg === 'Firebase: Error (auth/invalid-credential).') state.error = '비밀번호가 다릅니다.'
+                else state.error = errMsg;
+            })
+            .addCase(signUp.fulfilled, (state, action) => {
+                state.user = action.payload;
+                state.isLoading = false;
+            })
+            .addCase(googleLogin.fulfilled, (state, action) => {
+                console.log(action.payload)
+                state.user = action.payload;
+            })
+            .addCase(googleLogin.rejected, (state, action) => {
+               state.error = action.payload;
+            })
+            .addCase(githubLogin.fulfilled, (state, action) => {
+                state.user = action.payload;
+            })
+            .addCase(githubLogin.rejected, (state, action) => {
+                console.log('action',action.payload)
+            })
+    }
 });
 
-export const { loginUser, logoutUser, setLoading, setPhotoURL } = userSlice.actions;
+export const { loginUser, logoutUser, setLoading, setErrMsg } = userSlice.actions;
 export default userSlice.reducer;
 
