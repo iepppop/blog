@@ -5,7 +5,7 @@ import AuthButtons from './nav/AuthButtons.js'
 import GlobalStyle from './styles/global.js';
 import LoginPage from './pages/LoginPage.js';
 import { useState, useEffect } from 'react';
-import { initializeAuth, loginUser, setLoading } from './features/userSlice.js';
+import { initializeAuth, loginUser, checkUser } from './features/userSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase.js';
@@ -13,6 +13,7 @@ import SignUpPage from './pages/SignUpPage.js';
 import ProfileEditPage from './pages/ProfileEditPage.js';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import HomePage from './pages/HomePage.js';
 
 gsap.registerPlugin(useGSAP);
 
@@ -23,6 +24,7 @@ const lightTheme = {
     text: '#000000',
     border: '#eee',
     focus: '#1f1f1f',
+    point: '#0069ff'
   },
 };
 
@@ -33,6 +35,7 @@ const darkTheme = {
     text: '#FFFFFF',
     border: '#373737',
     focus: '#eee',
+    point: '#0069ff'
   },
 };
 
@@ -47,24 +50,15 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-        onAuthStateChanged(auth, (authUser) => {
-          if(authUser){
-            dispatch(loginUser({
-              uid: authUser.uid,
-              email: authUser.email,
-              displayName: authUser.displayName,
-              photoURL: authUser.photoURL,
-            }))
-            dispatch(setLoading(false))
-          }
-      })
-  },[])
+    dispatch(checkUser());
+  }, []); 
 
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <AuthButtons toggleTheme={toggleTheme} />
       <Routes>
+        <Route path='/' element={<HomePage />} ></Route>
         <Route path='/login' element={<LoginPage />} ></Route>
         <Route path='/signup' element={<SignUpPage />} ></Route>
         <Route path='/profile/edit' element={<ProfileEditPage />} ></Route>
