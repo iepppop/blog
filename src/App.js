@@ -1,14 +1,11 @@
-import logo from './logo.svg';
-import { css, ThemeProvider } from '@emotion/react'
+import { ThemeProvider } from '@emotion/react'
 import { Route, Routes } from 'react-router-dom';
 import AuthButtons from './nav/AuthButtons.js'
 import GlobalStyle from './styles/global.js';
 import LoginPage from './pages/LoginPage.js';
 import { useState, useEffect } from 'react';
-import { initializeAuth, loginUser, checkUser } from './features/userSlice.js';
-import { useDispatch, useSelector } from 'react-redux';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase.js';
+import { checkUser } from './features/userSlice.js';
+import { useDispatch } from 'react-redux';
 import SignUpPage from './pages/SignUpPage.js';
 import ProfileEditPage from './pages/ProfileEditPage.js';
 import gsap from 'gsap';

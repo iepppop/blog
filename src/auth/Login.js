@@ -2,11 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import styled from '@emotion/styled'
 import google from '../images/google.png'
 import github from '../images/github.png'
-import { auth } from '../firebase'
 import { login, googleLogin,githubLogin } from '../features/userSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { unwrapResult } from '@reduxjs/toolkit';
 import { WarningCircle } from "@phosphor-icons/react";
 
 const FormWrap = styled.form`
@@ -130,8 +128,7 @@ const ErrMsg = styled.div`
 function Login({theme}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isLoading, error } = useSelector((state) => state.data.user);
-  const [errMsg, setErrMsg] = useState('')
+  const { user, error } = useSelector((state) => state.data.user);
   const dispatch = useDispatch();
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
@@ -157,7 +154,6 @@ function Login({theme}) {
   useEffect(() => {
     emailInputRef.current.style.border = normal;
     passwordInputRef.current.style.border = normal;
-    console.log(normal)
     if (error === '이메일 형식이 아닙니다.' || error === '가입되어 있지 않은 계정입니다.') {
       emailInputRef.current.focus();
       emailInputRef.current.style.border = '1px solid red'
