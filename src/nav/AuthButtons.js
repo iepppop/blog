@@ -1,8 +1,7 @@
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from '@emotion/styled'
-import { useTheme } from '@emotion/react';
 import { Link, useNavigate, useLocation  } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from "../firebase";
@@ -53,6 +52,7 @@ const ProfileInfo = styled.div`
     position:absolute;
     top:40px;
     right:0px;
+    z-idnex:1;
     width:300px;
     border: 1px solid ${props => props.theme.colors.border};
     border-radius:10px;
@@ -127,6 +127,10 @@ const Modify = styled.div`
     }
 `
 
+const Img = styled.img`
+
+`
+
 
 function AuthButtons({ toggleTheme }) {
     const dispatch = useDispatch();
@@ -134,81 +138,67 @@ function AuthButtons({ toggleTheme }) {
     const location = useLocation();
     const profileRef = useRef();
     const tl = useRef();
-    const [isOpen, setIsOpen] = useState(false);
-    const [height, setHeight] = useState(0);
     const user = useSelector((state) => state.data.user.user);
-    const isLoading = useSelector((state) => state.data.user.isLoading);
 
     const handleLogout = () => {
         dispatch(logout());
     };
 
     function openProfile(){
-        setIsOpen(!isOpen);
         tl.current.reversed(!tl.current.reversed());
     };
 
     const moveEditPage = () =>{
+        tl.current.reversed(!tl.current.reversed());
         navigate('/profile/edit');
-        setIsOpen(false);
     }
 
-    // useGSAP(
-    // () => {
-    //         tl.current = gsap
-    //         .timeline()
-    //         .to(profileRef.current, { opacity: 1, ease: "none"},0)
-    //         .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
-    //         .reverse();
-    //     },
-    //     { scope: user }
-    // );  
+    useEffect(() => {
+        if(profileRef.current){
+            tl.current = gsap
+            .timeline()
+            .to(profileRef.current, { opacity: 1, ease: "none"},0)
+            .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
+            .reverse();
+        }
+    }, [user]);
 
     useEffect(() => {
-        tl.current = gsap
-        .timeline()
-        .to(profileRef.current, { opacity: 1, ease: "none"},0)
-        .to(profileRef.current, { height: '325px', ease: "power1.out"},0.2)
-        .reverse();
-        console.log('유저양',user)
-
-      }, [user]);
-
-    useEffect(() => {
-        profileRef.current && tl.current.reversed(!tl.current.reversed());
+        if(profileRef.current)  tl.current.reverse()
     }, [location]);
     
 
     return (
         <div>
-            {!isLoading ? <AuthWrap>
+            <AuthWrap>
             {user ?
                 <ProfileWrap>
                     <Profile onClick={openProfile}>
-                        <img src={user.photoURL} />
+                        <Img src={!auth.currentUser.photoURL ? 'https://blog.kakaocdn.net/dn/yacY3/btrE5gQ0V4f/qikIkKvyENANHyvoeGZTX0/img.png' : auth.currentUser.photoURL} />
                     </Profile>
-                    <ProfileInfo ref={profileRef}>
+                <ProfileInfo ref={profileRef}>
                         <div className="box">
                         <InfoImg>
-                            <img src={user.photoURL} />
+                            <Img src={auth.currentUser.photoURL} />
                         </InfoImg>
                         <InfoText>
-                            <span>{user.displayName}</span>
-                            <span>{user.email}</span>
+                            <span>{auth.currentUser.displayName}</span>
+                            <span>{auth.currentUser.email}</span>
                         </InfoText>
                         <Modify>
-                            <button onClick={moveEditPage}>프로필 수정</button>
+                            <button onClick={moveEditPage}>프로필 편집</button>
                             <button onClick={handleLogout}>로그아웃</button>
                         </Modify>
                         </div>
                     </ProfileInfo>
                 </ProfileWrap>
                 :
-                <LoginButton><Link to='login'>로그인</Link></LoginButton>
+                <div>
+                   { !(location.pathname === '/login' || location.pathname === '/signup') ? <LoginButton><Link to='/login'>로그인</Link></LoginButton> : null }
+                </div>
             }
             <ToggleButton onClick={toggleTheme}>ddd</ToggleButton>
-            {/* <LoginButton onClick={handleLogout}>로그아웃</LoginButton> */}
-        </AuthWrap> :null}
+        </AuthWrap> 
         </div>
     )
 }
