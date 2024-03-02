@@ -1,8 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux';
-import { editProfile } from '../features/userSlice.js';
+import { setLoading } from '../features/userSlice.js';
 import { keyframes } from '@emotion/react';
+import { CircleNotch, CheckCircle } from "@phosphor-icons/react";
+import { auth, storage } from '../firebase.js';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { updateProfile } from 'firebase/auth';
+import { Navigate } from 'react-router-dom'
 
 const Wrap = styled.div`
     width:100%;
@@ -87,7 +92,7 @@ const EditBtn = styled.div`
 `
 
 const CompleteBtn = styled.button`
-  background:#0069ff;
+  background:${props => props.theme.colors.point};
   width:280px;
   margin:37px 0 0 0;
   height:45px;
@@ -112,23 +117,66 @@ const rotate360 = keyframes`
 `;
 
 const LoadingIcon = styled.div`
-  animation: ${rotate360} 2s linear infinite;
+  svg{
+    animation: ${rotate360} 2s linear infinite;
+    fill:${props => props.theme.colors.point};
+  }
+`
+
+const CheckIcon = styled.div`
+  svg{
+    fill:${props => props.theme.colors.point};
+  }
 `
 
 const Modal = styled.div`
-  width:100px;
-  height:100px;
-  background:white;
+  width:300px;
+  height:300px;
+  background:${props => props.theme.colors.background};
+  position:fixed;
+  z-index:2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  border-radius:15px;
+`
+
+const ModalBg = styled.div`
+  width:100%;
+  height:100%;
+  background:${props => props.theme.colors.text};
+  opacity:0.6;
+  position:fixed;
+  left:0;
+  top:0;
+  z-index:1;
+`
+
+const ModalWrap = styled.div`
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:30px;
+  font-size:25px;
+  font-weight:600;
+  color:${props => props.theme.colors.text};
+`
+
+const Img = styled.img`
+
 `
 
 function ProfileEditPage() {
-  const user = useSelector((state) => state.data.user.user);
-  const isLoading = useSelector((state) => state.data.user.isLoading);
-
+  const {user, isLoading} = useSelector((state) => state.data.user);
   const imageInput = useRef();
   const [photo, setPhoto] = useState('');
   const [imageUrl, setImageUrl] = useState(null);
   const [username, setUsername] = useState(null);
+  const [isModal, setIsModal] = useState(false);
   const dispatch = useDispatch();
 
   const onCickImageUpload = () => {
@@ -146,26 +194,47 @@ function ProfileEditPage() {
     }
   }
 
-  const handleSaved = (username, photo) => { 
-    console.log('username',username);
-    console.log('photo', photo)
-    if (!username && !photo) return;
-    dispatch(editProfile(username, photo))
+  const handleSaved = async (username, file) => {
+    setIsModal(true)
+    dispatch(setLoading(true))
+    let photoURL;
+    if (typeof file === 'string' && file.includes('storage')) {
+      photoURL = file;
+    } else {
+      const fileRef = ref(storage, auth.currentUser.uid + '.png');
+      const snapshot = await uploadBytes(fileRef, file);
+      photoURL = await getDownloadURL(fileRef);
+    }
+    updateProfile(auth.currentUser, {
+      displayName: username ,photoURL
+    }).finally(()=>{
+      dispatch(setLoading(false))
+    })
   }
 
-  useEffect(()=>{
-    console.log('ss',isLoading)
-  },[isLoading])
-
-  useEffect(()=>{
+  useEffect(() => {
     if (user && user.photoURL) {
       setUsername(user.displayName);
       setPhoto(user.photoURL);
     }
-  },[user])
+  }, [user])
+
+  useEffect(() => {
+    if (isModal && !isLoading) {
+      const timer = setTimeout(() => {
+        setIsModal(false);
+      }, 900);
+      return () => clearTimeout(timer);
+    }
+  }, [isModal, isLoading]);
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <Wrap>
+      {isModal && <ModalBg></ModalBg>}
       {user ? <form onSubmit={e => {
         e.preventDefault();
         handleSaved(username, photo)
@@ -173,7 +242,7 @@ function ProfileEditPage() {
         <ProfileIImg>
           <input type="file" style={{ display: "none" }} onChange={handleChange} ref={imageInput} />
           <ImageWrap>
-            {imageUrl ? <img src={imageUrl} /> : <img src={user.photoURL} />}
+            {imageUrl ? <Img src={imageUrl} /> : <Img src={user.photoURL} />}
           </ImageWrap>
           <EditBtn onClick={onCickImageUpload}>
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 256 256"><path d="M230.14,70.54,185.46,25.85a20,20,0,0,0-28.29,0L33.86,149.17A19.85,19.85,0,0,0,28,163.31V208a20,20,0,0,0,20,20H92.69a19.86,19.86,0,0,0,14.14-5.86L230.14,98.82a20,20,0,0,0,0-28.28ZM91,204H52V165l84-84,39,39ZM192,103,153,64l18.34-18.34,39,39Z"></path></svg>
@@ -187,12 +256,22 @@ function ProfileEditPage() {
           <span>닉네임</span>
           <input type="text" placeholder={user.displayName} value={username || ''} onChange={e => setUsername(e.target.value)} name={username} />
         </NickNameWrap>
-        <CompleteBtn type="submit">
-         변경 완료
+        <CompleteBtn type="submit" disabled={isLoading ? true : false}>
+          변경 완료
         </CompleteBtn>
       </form> : null}
 
-        <Modal>loading</Modal>
+      {isModal && <Modal>
+        {isLoading ?
+          <ModalWrap>
+            <LoadingIcon><CircleNotch size={50} weight='bold' /></LoadingIcon>
+            저장 중입니다
+          </ModalWrap>
+          : <ModalWrap>
+            <CheckIcon><CheckCircle size={50} weight='bold' /></CheckIcon>
+            저장 완료
+          </ModalWrap>}
+      </Modal>}
     </Wrap>
   )
 }
