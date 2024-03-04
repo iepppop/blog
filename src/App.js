@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@emotion/react'
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import AuthButtons from './nav/AuthButtons.js'
 import GlobalStyle from './styles/global.js';
 import LoginPage from './pages/LoginPage.js';
@@ -11,6 +11,11 @@ import ProfileEditPage from './pages/ProfileEditPage.js';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import HomePage from './pages/HomePage.js';
+import ListPage from './pages/ListPage.js';
+import Header from './nav/Header.js';
+import styled from '@emotion/styled';
+import PlayListPage from './pages/PlayListPage.js';
+import ReviewPage from './pages/ReviewPage.js';
 
 gsap.registerPlugin(useGSAP);
 
@@ -36,9 +41,15 @@ const darkTheme = {
   },
 };
 
+const Wrap = styled.div`
+  margin:0 auto;
+  padding:30px 0 5px 0;
+  width:700px;
+`
 
 function App() {
-  const [theme, setTheme] = useState(lightTheme);
+  const [theme, setTheme] = useState(darkTheme);
+  const location = useLocation();
 
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === lightTheme ? darkTheme : lightTheme));
@@ -54,11 +65,18 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <AuthButtons toggleTheme={toggleTheme} />
+ 
+      {!(location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/profile/edit') &&           <Wrap><Header /></Wrap> }
+   
       <Routes>
         <Route path='/' element={<HomePage />} ></Route>
         <Route path='/login' element={<LoginPage />} ></Route>
         <Route path='/signup' element={<SignUpPage />} ></Route>
         <Route path='/profile/edit' element={<ProfileEditPage />} ></Route>
+        <Route path="/list" element={<ListPage />}>
+          <Route path="playlist" element={<PlayListPage />} />
+          <Route path="review" element={<ReviewPage />} />
+        </Route>
       </Routes>
     </ThemeProvider>
   );
