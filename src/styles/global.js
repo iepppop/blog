@@ -42,6 +42,10 @@ const GlobalStyle = () => {
       cursor:pointer;
     }
 
+    li{
+      list-style:none;
+    }
+
     a {
       color:  ${theme.colors.text};
       text-decoration: none;
