@@ -7,8 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { auth } from "../firebase";
 import { logout } from '../features/userSlice';
 
-
-
 const AuthWrap = styled.div`
     position:fixed;
     top:15px;
