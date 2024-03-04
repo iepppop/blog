@@ -105,6 +105,7 @@ const RegisterBtn = styled.div`
       font-size:12px;
       margin:0 0 0 10px;
       transition:0.3s ease-in-out;
+      color:${props => props.theme.colors.text};
 
       &:hover{
         opacity:0.7;
