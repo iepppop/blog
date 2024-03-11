@@ -121,7 +121,7 @@ const WriteBtn = styled.div`
 `
 
 function ListPage() {
-    const [menuList, setMenuList] = useState([{ name: '프로필', url: '/list/profile', id: 0 }, { name: '리뷰', url: '/list/review?category=drama', id: 1 }, { name: '영감', url: '/list/inspiration', id: 2 }, { name: '플레이리스트', url: '/list/playlist', id: 3 }])
+    const [menuList, setMenuList] = useState([{ name: '프로필', url: '/list/profile', id: 0 }, { name: '리뷰', url: '/list/review?category=drama', id: 1 }, { name: '영감', url: '/list/inspiration', id: 2 }, { name: '음악', url: '/list/playlist', id: 3 }])
     const [currentMenu, setCurrentMenu] = useState({});
     const location = useLocation();
     const navigate = useNavigate();

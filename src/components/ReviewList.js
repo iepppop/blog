@@ -42,7 +42,7 @@ const skeletonAnimation = keyframes`
 
 const ReviewListItem = styled.div`
     width: 100%;
-    height:300px;
+    aspect-ratio:2.2/1;
     border-radius:25px;
     overflow:hidden;
     background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)), url(${props => props.imgUrl});
@@ -50,6 +50,10 @@ const ReviewListItem = styled.div`
     background-position: center; 
     position:relative;
     cursor:pointer;
+
+    ${media[0]} {
+        aspect-ratio:2/1;
+    }
 
     &:hover{
         background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8)), url(${props => props.imgUrl});
@@ -60,6 +64,9 @@ const ReviewListItem = styled.div`
         display:block;
         opacity:0.3;
         max-height: 50px; 
+        @media (max-width: 555px) {
+            display: none;
+        }
     }
 
     &:hover .hoverarrow{
@@ -87,6 +94,10 @@ const Title = styled.div`
     font-weight:600;
     position:relative;
     width:100%;
+
+    ${media[0]} {
+        font-size:20px;
+    }
 `
 
 const Content = styled.div`
@@ -104,6 +115,10 @@ const Category = styled.div`
     padding:8px 15px;
     border:1px solid rgba(255,255,255, 0.3);
     font-size:13px;
+
+    ${media[0]} {
+        font-size:10px;
+    }
 `
 
 const Sub = styled.div`
