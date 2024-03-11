@@ -247,6 +247,7 @@ const BookBg = styled.div`
     height:100%;
     width:100%;
     filter: blur(60px);
+    -webkit-filter: blur(60px);
     opacity:0.6;
     position:absolute;
     top:0;
@@ -307,6 +308,10 @@ const BookFooter = styled.div`
     span:first-of-type{
         color:#b6b6b6;
         font-weight:600;
+
+        @media (max-width: 555px) {
+            font-size:11px;
+        }
     }
 
     span:last-of-type{
@@ -315,6 +320,9 @@ const BookFooter = styled.div`
         font-size:13px;
         color:#434343;
         opacity:0.9;
+        @media (max-width: 555px) {
+            font-size:11px;
+        }
     }
 `
 
@@ -322,6 +330,10 @@ const BookStorySum = styled.div`
     div{
         font-family: "Nanum Myeongjo", serif;
         font-weight: 600;
+
+        @media (max-width: 555px) {
+            font-size:12px;
+        }
     }
     p{
         font-family: "Nanum Myeongjo", serif;
