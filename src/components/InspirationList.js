@@ -81,7 +81,8 @@ function InspirationList({ data }) {
     const dispatch = useDispatch();
 
     const handleDel = (item) => {
-        const location = 'inspiration'
+        const location = 'inspiration';
+        console.log(item)
         dispatch(DeleteData({location , item }))    
     }
 

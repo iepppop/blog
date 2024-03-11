@@ -39,18 +39,25 @@ export const fetchData = createAsyncThunk('data/fetchData', async (location, thu
 
 export const sendData = createAsyncThunk('data/sendData', async ({content,thumbnail,imageList}, thunkAPI) => {
     try {
-        const dataList = [];
-        const docRef = await addDoc(collection(db, "list", '6rIGBZV7WPHNUXGm3KyY', "inspiration"), {
+  
+
+     
+        const dataToAdd = {
             uid: auth.currentUser.uid,
             displayName: auth.currentUser.displayName,
             email: auth.currentUser.email,
             photoURL: auth.currentUser.photoURL,
             text: content,
-            thumbnail,
             images: imageList,
             timestamp: serverTimestamp(),
-        });
-        return dataList;
+        };
+
+        if (thumbnail !== undefined) {
+            dataToAdd.thumbnail = thumbnail;
+        }
+
+        const docRef = await addDoc(collection(db, "list", '6rIGBZV7WPHNUXGm3KyY', "inspiration"), dataToAdd);
+     
     } catch (error) {
         return thunkAPI.rejectWithValue(error.message);
     }
@@ -59,7 +66,7 @@ export const sendData = createAsyncThunk('data/sendData', async ({content,thumbn
 export const DeleteData = createAsyncThunk('data/DeleteData', async ({location, item}, thunkAPI) => {
     try{
         const desertRef = ref(storage, `${location}/${auth.currentUser.uid}/${item.images[0].fileName}`);
-        console.log()
+        console.log(desertRef)
         await deleteObject(desertRef);
         await deleteDoc(doc(db, "list", "6rIGBZV7WPHNUXGm3KyY",`${location}`,`${item.id}`));
     }   
@@ -128,6 +135,9 @@ export const dataSlice = createSlice({
                 state.isLoading = false;
             })
             .addCase(sendData.rejected, (state, action) => {
+                console.log(action.payload)
+            })
+            .addCase(DeleteData.rejected, (state, action) => {
                 console.log(action.payload)
             })
             .addCase(ImageUpload.fulfilled, (state, action) => {
