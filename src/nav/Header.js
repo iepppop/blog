@@ -90,7 +90,7 @@ const SearchBar = styled.div`
 function Header() {
     return (
         <div>
-        <Wrap>
+        {/* <Wrap>
             <MenuBtn>
                 <MenuBtnWrap>
                 <span></span><span></span><span></span>
@@ -102,7 +102,7 @@ function Header() {
         </Wrap>
         <SearchBar>
                 <input placeholder="search.."/>
-        </SearchBar>
+        </SearchBar> */}
         </div>
     )
 }
