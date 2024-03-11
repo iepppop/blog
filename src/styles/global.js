@@ -5,6 +5,8 @@ const GlobalStyle = () => {
   const theme = useTheme();
 
   const style = css`
+    @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap');
+
     @font-face {
       font-family: 'Pretendard';
       src: url('../../node_modules/pretendard/dist/public/static/Pretendard-Regular.otf') format('otf');
