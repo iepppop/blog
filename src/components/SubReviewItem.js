@@ -7,6 +7,7 @@ import { db } from '../firebase';
 import { Star, ArrowLeft,CircleNotch } from "@phosphor-icons/react";
 import Comments from './Comments';
 import { keyframes } from '@emotion/react';
+import { media } from '../utils/media';
 
 const Wrap = styled.div`
     overflow:hidden;
@@ -39,21 +40,27 @@ const BoxWrap = styled.div`
 
 const TopImg = styled.div`
     position:absolute;
-    top:0;
     left:0;
     width:100%;
 `
 
 const TopImage = styled.div`
-    position:absolute;
-    top:-55px;
+    position:relative;
     filter: blur(0.2px);
+    width:100%;
+    height:100%;
 
     img{
         width:105%;
+        height:100%;
+        object-fit:cover;
         position:relative;
         left:-10px;
-        top:-10px;
+        top:-60px;
+
+        ${media[0]} {
+           top:-30px;
+        }
     }
 `
 
@@ -71,12 +78,18 @@ const ContentBox = styled.div`
     background:#fff;
     border-radius:25px 25px 0 0;
     padding:2px 0 0 0;
+    z-index:100;
+    position:relative;
 `
 
 const ContentWrap = styled.div`
     color:black;
     padding:200px 0 0 0;
     position:relative;
+
+    ${media[0]} {
+        padding:160px 0 0 0;
+     }
 `
 const TitleWrap = styled.div`
     margin:30px;
@@ -88,6 +101,9 @@ const Title = styled.div`
     font-size:35px;
     font-weight:700;
     opacity:0.8;
+    ${media[0]} {
+        font-size:30px;
+     }
 `
 
 const TitleSub = styled.div`
@@ -121,6 +137,9 @@ const StarWrap = styled.div`
 
 const ReviewContent = styled.div`
     padding:0 25px 25px 25px;
+    ${media[0]} {
+        font-weight:600;
+     }
     p{
         margin:10px 0 0 0;
     }

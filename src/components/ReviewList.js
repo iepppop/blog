@@ -52,7 +52,7 @@ const ReviewListItem = styled.div`
     cursor:pointer;
 
     ${media[0]} {
-        aspect-ratio:2/1;
+        aspect-ratio:1.8/1;
     }
 
     &:hover{
@@ -96,12 +96,20 @@ const Title = styled.div`
     width:100%;
 
     ${media[0]} {
-        font-size:20px;
+        font-size:18px;
     }
 `
 
 const Content = styled.div`
     margin:5px 0 0 0;
+
+    span{
+        svg{
+            @media (max-width: 555px) {
+                width:10px;
+            }
+        }
+    }
 `
 
 const Category = styled.div`
@@ -125,6 +133,9 @@ const Sub = styled.div`
     font-size:12px;
     opacity:0.3;
     margin:5px 0 0 0;
+    @media (max-width: 555px) {
+        display: none;
+    }
 `
 
 const HoverArrow = styled.div`
