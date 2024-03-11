@@ -195,7 +195,7 @@ function AuthButtons({ toggleTheme }) {
                    { !(location.pathname === '/login' || location.pathname === '/signup') ? <LoginButton><Link to='/login'>로그인</Link></LoginButton> : null }
                 </div>
             }
-            <ToggleButton onClick={toggleTheme}>ddd</ToggleButton>
+            {/* <ToggleButton onClick={toggleTheme}>ddd</ToggleButton> */}
         </AuthWrap> 
         </div>
     )
