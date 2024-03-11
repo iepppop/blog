@@ -4,6 +4,8 @@ import YouTube from 'react-youtube';
 import { Play } from "@phosphor-icons/react";
 import record from '../images/record.png'
 import { css, keyframes } from '@emotion/react';
+import vinyle from '../images/vinyle.png'
+import { media } from '../utils/media'
 
 const PlayListItems = styled.div`
     width:100%;
@@ -18,6 +20,9 @@ const PlayListItemsWrap = styled.div`
         width:100%;
         gap:20px;
         padding:25px;
+        ${media[1]} {
+            grid-template-columns: 1fr;
+          }
     }
 `
 
@@ -109,23 +114,29 @@ const AlbumBox = styled.div`
     position:relative;
     background:#f8f8f8;
     border-radius:25px;
-
-    div{
-        display:flex;
-        justify-content:center;
-    }
 `
 
 const AlbumWrap = styled.div`
     opacity: ${({ imageLoaded }) => (imageLoaded ? 1 : 0)};
     transition: opacity 0.3s ease-in-out;
+    display:flex;
+    justify-content:center;
+    width:94%;
 `
 
 const Album = styled.div`
     width:75%;
     position:relative;
     z-index:1;
-    padding:0 40px 0 0;
+    overflow:hidden;
+    display:flex;
+    height:100%;
+    text-align:left;
+`
+
+const AlbumImgWrap = styled.div`
+    position:relative;
+    width:80%;
 `
 
 const rotate360 = keyframes`
@@ -240,6 +251,15 @@ const LoadingAlbumBox = styled.div`
     border-radius:25px;
 `
 
+const VinyleWrap = styled.div`
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    z-index:999;
+`
+
 
 function PlayList({ data }) {
     const [playingVideoId, setPlayingVideoId] = useState('');
@@ -295,10 +315,13 @@ function PlayList({ data }) {
                                     <AlbumBox>
                                         <AlbumWrap imageLoaded={imageLoaded}>
                                             <Album>
-                                                <Image src={item.albumImg} alt="Album" />
+                                                <AlbumImgWrap>
+                                                    <VinyleWrap><img src={vinyle} /></VinyleWrap>
+                                                    <Image src={item.albumImg} alt="Album" />
+                                                </AlbumImgWrap>
                                             </Album>
                                             <Record>
-                                                <RImage src={record} playingVideoId={playingVideoId} videoId={item.videoId}/>
+                                                <RImage src={record} playingVideoId={playingVideoId} videoId={item.videoId} />
                                             </Record>
                                         </AlbumWrap>
                                     </AlbumBox>
