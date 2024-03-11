@@ -1,12 +1,12 @@
 import styled from '@emotion/styled'
-import { useRef, useState } from 'react';
-import { Editor } from '@toast-ui/react-editor';
-import '@toast-ui/editor/dist/toastui-editor.css';
+import { useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { sendData } from '../features/dataSlice'
 import { auth, storage } from '../firebase.js'
 import { getDownloadURL, ref, uploadBytes, uploadString, deleteObject } from 'firebase/storage';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ReactQuill, { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Wrap = styled.div`
     width:700px;
@@ -38,33 +38,46 @@ function WritePage() {
     const [thumbnail, setThumbnail] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
+    const [content, setContent] = useState("");
 
-    const onUploadImage = async (blob, callback) => {
-        const fileName = `${Date.now().toString()}_${blob.name}`;
-        const storageRef = ref(storage, `inspiration/${auth.currentUser.uid}/${fileName}`);
-        try {
-            const snapshot = await uploadBytes(storageRef, blob);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-            callback(downloadURL, blob.name);
-            setImageList((prevImageList) => [...prevImageList, { downloadURL, fileName }]);
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
+    const onUploadImage = async () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.click();
+
+        input.addEventListener("change", async () => {
+            const editor = editorRef.current.getEditor();
+            const file = input.files[0];
+            const range = editor.getSelection(true);
+            try {
+                const fileName = `${Date.now().toString()}_${file.name}`;
+                const storageRef = ref(storage, `inspiration/${auth.currentUser.uid}/${fileName}`);
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref).then((url) => {
+                    console.log('url주소',url)
+                    editor.insertEmbed(range.index, "image", url);
+                    editor.setSelection(range.index + 1);
+                    setImageList((prevImageList) => [...prevImageList, { downloadURL:url, fileName }]);
+                })
+            } catch (error) {
+                console.error(error);
+            }
+        })
     };
 
     const handleRegisterButton = async () => {
-        const editorIns = editorRef.current?.getInstance();
-        const content = editorIns?.getHTML();
         const delImgList = [];
+        let thumbnail;
 
         imageList?.forEach((img) => {
-            console.log('img',img)
-            console.log('content',content)
+            console.log('img', img)
+            console.log('content', content)
             if (!content.includes(img.fileName)) {
                 delImgList.push(img.fileName);
             }
+            thumbnail = imageList[0].downloadURL;
         })
-        console.log(delImgList)
 
         if (delImgList.length > 0) {
             delImgList.forEach(async (fileName) => {
@@ -80,35 +93,53 @@ function WritePage() {
                 }
             });
         }
-        let thumbnail = imageList[0].downloadURL;
+     
+        console.log(content)
+        console.log('임지리스트',imageList)
+        console.log(thumbnail)
 
         dispatch(sendData({ content, thumbnail, imageList }));
         navigate(decodeURIComponent(location.search).split('=')[1])
     };
 
-    const onChange = async () => {
-
-    };
-
+    const modules = useMemo(() => {
+        return {
+            toolbar: {
+                container: [
+                    ['image'],
+                    [{ header: [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                ],
+                handlers: {
+                    image: onUploadImage,
+                },
+            },
+        };
+    }, []);
+    const formats = [
+        'header',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'blockquote',
+        'image',
+    ];
     return (
         <Wrap>
             <WriteWrap>
-                <Editor
+                <ReactQuill
                     ref={editorRef}
                     placeholder="내용을 입력해주세요."
                     previewStyle="vertical"
-                    height="100%"
                     initialEditType="wysiwyg"
-                    onChange={onChange}
-                    toolbarItems={[
-                        ['heading', 'bold', 'italic', 'strike'],
-                        ['hr', 'quote'],
-                        ['ul', 'ol', 'task', 'indent', 'outdent'],
-                        ['table', 'image', 'link'],
-                        ['code', 'codeblock']
-                    ]}
-                    hooks={{ addImageBlobHook: onUploadImage }}
-                ></Editor>
+                    style={{ minHeight: '400px' }}
+                    onChange={setContent}
+                    theme="snow"
+                    modules={modules}
+                    formats={formats}
+                    value={content}
+                ></ReactQuill>
                 <Btn onClick={handleRegisterButton}>확인</Btn>
             </WriteWrap>
         </Wrap>
