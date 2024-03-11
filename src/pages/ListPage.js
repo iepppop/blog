@@ -152,9 +152,9 @@ function ListPage() {
                         <span>my favorite things</span>
                         <span>@ohyesrim</span>
                     </ProfileInfo>
-                    <WriteBtn onClick={()=>handleWrite()}>
+                    {location.pathname.includes('inspiration') &&       <WriteBtn onClick={()=>handleWrite()}>
                     <Pencil size={20}/>
-                    </WriteBtn>
+                    </WriteBtn>}
                 </Profile>
                 <MenuWrap>
                     {menuList.map((item, index) => (
