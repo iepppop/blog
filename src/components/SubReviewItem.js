@@ -41,6 +41,7 @@ const BoxWrap = styled.div`
 const TopImg = styled.div`
     position:absolute;
     left:0;
+    z-index:0;
     width:100%;
 `
 
@@ -83,12 +84,14 @@ const ContentBox = styled.div`
 `
 
 const ContentWrap = styled.div`
-    color:black;
+    color:#1c1c1c;
     padding:200px 0 0 0;
     position:relative;
+    z-index:200;
+
 
     ${media[0]} {
-        padding:160px 0 0 0;
+        padding:100px 0 0 0;
      }
 `
 const TitleWrap = styled.div`
@@ -137,9 +140,7 @@ const StarWrap = styled.div`
 
 const ReviewContent = styled.div`
     padding:0 25px 25px 25px;
-    ${media[0]} {
-        font-weight:600;
-     }
+
     p{
         margin:10px 0 0 0;
     }
