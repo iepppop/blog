@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@emotion/react'
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import AuthButtons from './nav/AuthButtons.js'
 import GlobalStyle from './styles/global.js';
 import LoginPage from './pages/LoginPage.js';
@@ -16,6 +16,12 @@ import Header from './nav/Header.js';
 import styled from '@emotion/styled';
 import PlayListPage from './pages/PlayListPage.js';
 import ReviewPage from './pages/ReviewPage.js';
+import InspirationPage from './pages/InspirationPage.js';
+import WritePage from './pages/WritePage.js';
+import WorksPage from './pages/WorksPage.js';
+import SubReviewItem from './components/SubReviewItem.js';
+import ProfilePage from './pages/ProfilePage.js';
+import { media } from './utils/media'
 
 gsap.registerPlugin(useGSAP);
 
@@ -45,6 +51,11 @@ const Wrap = styled.div`
   margin:0 auto;
   padding:30px 0 5px 0;
   width:700px;
+
+  ${media[0]} {
+    width:100%;
+    padding:5px 0 0 0;
+  }
 `
 
 function App() {
@@ -56,26 +67,40 @@ function App() {
   };
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(checkUser());
-  }, []); 
+  }, []);
+
+  useEffect(() => {
+    if(location.pathname === '/'){
+      navigate('/list/profile')
+    }
+    console.log(location)
+  },[location.search])
 
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <AuthButtons toggleTheme={toggleTheme} />
- 
-      {!(location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/profile/edit') &&           <Wrap><Header /></Wrap> }
-   
+
+      {!(location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/profile/edit') && <Wrap><Header /></Wrap>}
+
       <Routes>
         <Route path='/' element={<HomePage />} ></Route>
         <Route path='/login' element={<LoginPage />} ></Route>
         <Route path='/signup' element={<SignUpPage />} ></Route>
         <Route path='/profile/edit' element={<ProfileEditPage />} ></Route>
+        <Route path="/write" element={<WritePage />} />
         <Route path="/list" element={<ListPage />}>
+         <Route path="profile" element={<ProfilePage />} />
+          <Route path="works" element={<WorksPage />} />
+          <Route path="inspiration" element={<InspirationPage />} />
           <Route path="playlist" element={<PlayListPage />} />
-          <Route path="review" element={<ReviewPage />} />
+          <Route path="review/:id" element={<SubReviewItem />} />
+          <Route path="review" element={<ReviewPage />} >
+          </Route>
         </Route>
       </Routes>
     </ThemeProvider>
