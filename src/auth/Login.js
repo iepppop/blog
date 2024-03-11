@@ -166,12 +166,12 @@ function Login({theme}) {
 
   useEffect(() => {
     if(user){
-      navigate('/')
+      navigate('/list/profile')
     }
   },[user])
 
   if (user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/list/profile" />;
   }
 
   return (
