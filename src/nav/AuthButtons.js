@@ -6,6 +6,7 @@ import { Link, useNavigate, useLocation  } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth } from "../firebase";
 import { logout } from '../features/userSlice';
+import { media } from '../utils/media';
 
 const AuthWrap = styled.div`
     position:fixed;
@@ -13,6 +14,10 @@ const AuthWrap = styled.div`
     right:15px;
     display:flex;
     gap:5px;
+
+    ${media[0]} {
+        display:none;
+      }
 `
 
 const LoginButton = styled.button`
