@@ -1,14 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Pencil } from '@phosphor-icons/react';
+import { media } from '../utils/media'
 
 const Wrap = styled.div`
+    padding:0 0 30px 0;
+    ${media[0]} {
+        padding:0 10px;
+    }
+`
+
+const ListWrap  = styled.div`
     width:700px;
     background:#fff;
-    margin:0 auto;
     border-radius:25px;
     overflow:hidden;
+    margin:0 auto;
+    ${media[0]} {
+        width: 100%;
+      }
 `
 
 const Box = styled.div`
@@ -66,6 +78,7 @@ const MenuWrap = styled.ul`
         color:black;
         text-align:center;
         font-weight:600;
+        cursor:pointer;
         a{
             color:black;
         }
@@ -83,45 +96,77 @@ const CurrentBorder = styled.div`
     transition:0.3s ease-in-out;
 `
 
+const WriteBtn = styled.div`
+    position:absolute;
+    right:25px;
+    top:25px;
+    border:1px solid #000;
+    border-radius:50%;
+    width:40px;
+    height:40px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    transition:0.3s ease-in-out;
+
+    svg{
+        fill:black;
+    }
+
+    &:hover{
+        opacity:0.5;
+    }
+`
+
 function ListPage() {
-    const [menuList, setMenuList] = useState([{ name: '전체', url: '/list', id: 0 }, { name: '리뷰', url: '/list/review', id: 1 }, { name: '영감', url: '/list/inspiration', id: 2 }, { name: '플레이리스트', url: '/list/playlist', id: 3 }])
+    const [menuList, setMenuList] = useState([{ name: '프로필', url: '/list/profile', id: 0 }, { name: '리뷰', url: '/list/review?category=drama', id: 1 }, { name: '영감', url: '/list/inspiration', id: 2 }, { name: '플레이리스트', url: '/list/playlist', id: 3 }])
     const [currentMenu, setCurrentMenu] = useState({});
     const location = useLocation();
+    const navigate = useNavigate();
 
     const movePage = (item) => {
         setCurrentMenu(item)
+        navigate(item.url)
     }
+
+    const handleWrite = () => {
+        navigate(`/write?original=${encodeURIComponent(location.pathname)}`);
+    };
 
     useEffect(() => {
         const path = location.pathname.split('/')[2];
-        if (path) {  
-            setCurrentMenu(menuList.find(menu => menu.url.includes(path))) 
-        }else{
-            setCurrentMenu({ name: '전체', url: '/list', id: 0 }) 
-        };
+        if (path) setCurrentMenu(menuList.find(menu => menu.url.includes(path))) 
+        else setCurrentMenu({ name: '프로필', url: '/list/profile', id: 0 }) 
     }, [location.pathname])
     return (
         <Wrap>
+            <ListWrap>
             <Box>
                 <Profile>
                     <ProfileImg>
-                        <Img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FHPhx1%2FbtsAJhd9s2r%2F1tbQYqQtZZePLBUQGWUYr0%2Fimg.jpg" />
+                        <Img src="https://blog.kakaocdn.net/dn/QrRmk/btsFyxRRe3u/lWvvbrlRcKPTg24U2aqcz0/img.jpg" />
                     </ProfileImg>
                     <ProfileInfo>
                         <span>my favorite things</span>
                         <span>@ohyesrim</span>
                     </ProfileInfo>
+                    <WriteBtn onClick={()=>handleWrite()}>
+                    <Pencil size={20}/>
+                    </WriteBtn>
                 </Profile>
                 <MenuWrap>
                     {menuList.map((item, index) => (
                         <li key={index} style={{ fontWeight: currentMenu.id === index ? 800 : '600', opacity: currentMenu.id === index ? 1 : 0.3 }} onClick={() => movePage(item)} >
-                            <Link to={item.url}>{item.name}</Link>
+                           {item.name}
                         </li>
                     ))}
                     <CurrentBorder style={{ left: currentMenu.id * 25 + '%' }}></CurrentBorder>
                 </MenuWrap>
                 <Outlet />
             </Box>
+            </ListWrap>
         </Wrap>
     )
 }
