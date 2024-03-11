@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled'
 import ReviewList from '../components/ReviewList';
-import { fetchData } from '../features/dataSlice';
+import { fetchData, setCategory } from '../features/dataSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Wrap = styled.div`
     width:100%;
@@ -36,29 +37,47 @@ const CategoryWrap = styled.div`
     font-size:15px;
     padding:0 15px;
     cursor:pointer;
-
-    :nth-child(1){
-      color:#2d2d2d;
-      font-weight:800;
-    }
-
 `
 
 function ReviewPage() {
   const dispatch = useDispatch();
-  const { data } = useSelector((state) => state.data.data)
-  useEffect(() => {
-    console.log('d')
-    console.log(data)
-    dispatch(fetchData('review'))
-  }, [])
+  const { data, category } = useSelector((state) => state.data.data)
+  const [subMenuList, setMenuList] = useState([{ kor: '드라마', eng: 'drama' }, { kor: '영화', eng: 'movie' }, { kor: '애니메이션', eng: 'animation' }, { kor: '책', eng: 'book' }, { kor: '웹툰', eng: 'weebtoon' }])
+  const [currentMenu, setCurrentMenu] = useState({ kor: '드라마', eng: 'drama' });
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [filteredData, setFilteredData] = useState([]);
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const cateQuery = queryParams.get('category');
+    if (!cateQuery) {
+      return navigate('/list/review?category=drama')
+    }
+    dispatch(fetchData('review'))
+    dispatch(setCategory(cateQuery))
+    console.log(location.search)
+  }, [location.search])
+
+  useEffect(()=>{
+      setCurrentMenu({ eng: category })
+  }, [category])
+
+  const handleMenuClick = (menu) => {
+    setCurrentMenu(menu);
+    const queryParams = new URLSearchParams();
+    queryParams.append('category', `${menu}`);
+    navigate(`?${queryParams.toString()}`);
+  }
   return (
     <Wrap>
       <SubMenuWrap>
-        {/* <Category>카테고리</Category> */}
         <CategoryWrap>
-          <li>드라마</li><li>영화</li><li>애니메이션</li><li>책</li><li>웹툰</li>
+          {subMenuList.map((menu) => {
+            return (
+              <li key={menu.eng} style={{ fontWeight: currentMenu.eng === menu.eng ? 800 : '', color: currentMenu.eng === menu.eng ? '#2d2d2d' : '' }} onClick={() => handleMenuClick(menu.eng)}>{menu.kor}</li>
+            )
+          })}
         </CategoryWrap>
       </SubMenuWrap>
       <ReviewList data={data} />
