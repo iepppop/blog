@@ -2,7 +2,7 @@
 ![](https://velog.velcdn.com/images/iepppop/post/8e214633-42e2-4a70-b88b-57f25b489495/image.png)
 
 ### URL
-[[recipe-palette.vercel.app/](https://blog-roan-eta-54.vercel.app/list/profile)](https://blog-roan-eta-54.vercel.app/list/profile)
+[블로그](https://blog-roan-eta-54.vercel.app/list/profile)
 
 ### Install
     npm start
